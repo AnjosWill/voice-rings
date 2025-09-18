@@ -86,8 +86,8 @@ export const RingControls = () => {
         <Slider
           id="size"
           label="Diâmetro"
-          min={200}
-          max={300}
+          min={100}
+          max={250}
           step={1}
           value={Math.round(activeRing.baseRadius * 2)}
           onChange={handleSizeChange}
@@ -96,7 +96,7 @@ export const RingControls = () => {
         <Slider
           id="thick"
           label="Espessura"
-          min={2}
+          min={1}
           max={4}
           step={0.1}
           value={activeRing.lineWidthBase}
@@ -107,7 +107,7 @@ export const RingControls = () => {
           id="osc"
           label="Oscilação"
           min={0}
-          max={8}
+          max={20}
           step={0.1}
           value={Math.round(activeRing.expandPct * 100)}
           onChange={handleOscChange}

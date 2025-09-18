@@ -63,14 +63,27 @@ export const CanvasPreview = () => {
         if (show) {
           const ctxMini = miniRef.current?.getContext("2d");
           if (ctxMini) {
-            ctxMini.clearRect(0, 0, ctxMini.canvas.width, ctxMini.canvas.height);
-            drawComposite(ctxMini, rings, frame, frameCount, global, activeRingId, {
-              spec,
-            });
+            ctxMini.clearRect(
+              0,
+              0,
+              ctxMini.canvas.width,
+              ctxMini.canvas.height
+            );
+            drawComposite(
+              ctxMini,
+              rings,
+              frame,
+              frameCount,
+              global,
+              activeRingId,
+              {
+                spec,
+              }
+            );
           }
         }
       },
-      { threshold: 0.6 },
+      { threshold: 0.6 }
     );
     observer.observe(container);
     return () => observer.disconnect();
@@ -78,7 +91,9 @@ export const CanvasPreview = () => {
 
   useEffect(() => {
     const onFocusIn = (ev: FocusEvent) => {
-      if (window.matchMedia("(min-width: 960px), (min-aspect-ratio: 1/1)").matches) {
+      if (
+        window.matchMedia("(min-width: 960px), (min-aspect-ratio: 1/1)").matches
+      ) {
         return;
       }
       const target = ev.target as HTMLElement | null;
@@ -111,16 +126,24 @@ export const CanvasPreview = () => {
   };
 
   return (
-    <section ref={containerRef} className="card flex min-h-0 flex-col lg:flex-1 lg:basis-1/2 lg:max-h-[calc(96vh)] lg:overflow-hidden" id="playerCol">
+    <section
+      ref={containerRef}
+      className="card flex min-w-full flex-col lg:flex-1 lg:basis-1/2 lg:min-h-[calc(96vh)] lg:max-h-[calc(96vh)] lg:max-w-[calc(96vh)] lg:overflow-hidden"
+      id="playerCol"
+    >
       <div className="head">
         <h2>Pré-visualização</h2>
       </div>
-      <div className="body flex flex-1 min-h-0 flex-col gap-4 overflow-hidden">
-        <div className="panel divided flex flex-1 min-h-0 flex-col overflow-hidden">
-          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-            <div className="relative w-full max-h-full max-w-full">
-              <div className="relative mx-auto aspect-square w-full max-w-[min(100%,85vh)] max-h-full rounded-2xl border border-white/10 bg-checker p-2 overflow-hidden">
-                <canvas ref={canvasRef} className="h-full w-full rounded-xl" aria-label="Player" />
+      <div className="body flex flex-2 flex-col gap-4 overflow-hidden">
+        <div className="panel divided flex flex-1 flex-col overflow-hidden">
+          <div className="flex flex-1 items-center justify-center overflow-hidden">
+            <div className="relative w-full h-full">
+              <div className="relative mx-auto aspect-square min-w-full lg:min-w-[calc(70vh)] max-h-[calc(70vh)] lg:max-w-[calc(70vh)] rounded-2xl border border-white/10 bg-checker overflow-hidden">
+                <canvas
+                  ref={canvasRef}
+                  className="h-full w-full rounded-xl"
+                  aria-label="Player"
+                />
               </div>
             </div>
           </div>
@@ -137,25 +160,38 @@ export const CanvasPreview = () => {
                 valueDisplay={`${fps}`}
               />
             </div>
-            <Button id="playPause" variant={playing ? "secondary" : "primary"} onClick={togglePlaying}>
+            <Button
+              id="playPause"
+              variant={playing ? "secondary" : "primary"}
+              onClick={togglePlaying}
+            >
               {playing ? "Pausar" : "Reproduzir"}
             </Button>
           </div>
         </div>
       </div>
       <div
-        className={`pip pointer-events-auto fixed bottom-4 right-4 z-30 w-full max-w-[min(90vw,18rem)] rounded-2xl border border-white/10 bg-[#0f141a] p-4 shadow-xl transition ${
-          pipVisible ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`pip pointer-events-auto fixed bottom-4 right-4 z-30
+              w-fit max-w-[90vw] sm:max-w-[18rem]
+              rounded-2xl border border-white/10 bg-[#0f141a] p-3 shadow-xl transition
+              ${pipVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
         aria-hidden={!pipVisible}
       >
-        <div className="pip-inner flex w-full flex-col items-center gap-3">
-          <div className="relative aspect-square w-28 overflow-hidden rounded-2xl border border-white/10 bg-checker p-2">
-            <canvas ref={miniRef} className="h-full w-full rounded-xl" aria-label="Mini Player" />
+        <div className="pip-inner flex w-fit flex-col items-center gap-3">
+          <div className="relative mx-auto aspect-square w-fit max-w-[min(100%,30vh)] max-h-full rounded-2xl border border-white/10 bg-checker overflow-hidden">
+            <canvas
+              ref={miniRef}
+              className="h-full w-full rounded-xl"
+              aria-label="Mini Player"
+            />
           </div>
-          <Button id="pipClose" variant="ghost" onClick={pipClose}>
-            Fechar
-          </Button>
+          <Button
+            id="pipClose"
+            variant="ghost"
+            onClick={pipClose}
+            className="w-full"
+          >
+            Fechar</Button>
         </div>
       </div>
     </section>
