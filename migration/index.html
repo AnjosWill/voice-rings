@@ -1,0 +1,2017 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Voice Rings - Múltiplos (Mobile/Responsive)</title>
+    <style>
+      :root {
+        --bg: #0b0e11;
+        --panel: #0f141a;
+        --muted: #9fb3c8;
+        --radius: 16px;
+        --pad: 14px;
+        --tap: 48px;
+        --line: rgba(255, 255, 255, 0.08);
+        --header-h: 64px;
+        --player-max: 100vh;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font: 15px/1.5 -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+          Inter, "Helvetica Neue", Arial, Noto Sans;
+        color: #e8f1ff;
+        background: var(--bg);
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 100%;
+      }
+      header.app {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        backdrop-filter: saturate(140%) blur(8px);
+        background: linear-gradient(
+          180deg,
+          rgba(12, 17, 26, 0.9),
+          rgba(12, 17, 26, 0.6)
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad)
+          var(--pad);
+        display: grid;
+        gap: 6px;
+      }
+      .title {
+        font-size: 16px;
+        font-weight: 700;
+        text-align: center;
+      }
+      .muted {
+        color: var(--muted);
+        text-align: center;
+      }
+
+      main {
+        display: grid;
+        gap: var(--pad);
+        padding: var(--pad);
+        grid-template-areas: "preview" "controls" "layers" "sprite";
+      }
+      #playerCol {
+        grid-area: preview;
+        min-height: 0;
+      }
+      #controlsCol {
+        grid-area: controls;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+      #layersCol {
+        grid-area: layers;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+      #spriteCol {
+        grid-area: sprite;
+        min-height: 0;
+      }
+
+      @media (min-width: 1100px), (min-aspect-ratio: 4/3) {
+        main {
+          height: calc(100vh - var(--header-h));
+          overflow: hidden;
+          grid-template-columns: minmax(300px, 26vw) minmax(520px, 1fr) minmax(
+              280px,
+              22vw
+            );
+          grid-template-rows: 1fr auto;
+          align-items: stretch;
+          grid-template-areas: "controls preview layers" "controls preview sprite";
+        }
+        :root {
+          --pad: 12px;
+          --tap: 42px;
+        }
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .card h2 {
+        margin: 0;
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        text-align: center;
+      }
+      .card .head {
+        padding: 10px var(--pad);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .card .body {
+        padding: var(--pad);
+        display: grid;
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .panel {
+        background: #0c111a;
+        border: 1px dashed rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: var(--pad);
+        display: grid;
+        gap: 10px;
+      }
+      .panel.divided {
+        gap: 0;
+        grid-template-rows: 1fr auto;
+        min-height: 0;
+      }
+      .panel.divided .ctrls {
+        border-top: 2px solid var(--line);
+        padding: var(--pad);
+        display: grid;
+        gap: 10px;
+      }
+
+      #player {
+        width: min(100%, var(--player-max));
+        aspect-ratio: 1/1;
+        height: auto;
+        max-height: var(--player-max);
+        background: repeating-conic-gradient(#2a3140 0 25%, #222938 0 50%) 0/18px
+          18px;
+        border-radius: 12px;
+      }
+      #sheet {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: repeating-conic-gradient(#2a3140 0 25%, #222938 0 50%) 0/18px
+          18px;
+        border-radius: 12px;
+      }
+
+      .controls {
+        display: grid;
+        gap: 10px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .row > label {
+        flex: 1 1 180px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: var(--tap);
+      }
+      .row > label > input[type="range"] {
+        width: 100%;
+        height: 28px;
+      }
+      .row > label > input[type="color"] {
+        width: 40px;
+        height: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        background: #0b0f14;
+        padding: 0;
+      }
+      .row.stack {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .row.stack > label {
+        flex: 1 1 auto;
+      }
+      .row > label select {
+        width: 100%;
+      }
+      select,
+      button,
+      input[type="text"] {
+        height: var(--tap);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
+        );
+        color: #fff;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 650;
+      }
+      button.primary {
+        border-color: rgba(33, 178, 209, 0.6);
+        background: linear-gradient(
+          180deg,
+          rgba(33, 178, 209, 0.22),
+          rgba(91, 78, 230, 0.16)
+        );
+        box-shadow: 0 6px 18px rgba(91, 78, 230, 0.22);
+      }
+
+      .layers {
+        display: grid;
+        gap: 8px;
+      }
+      #controlsCol .body {
+        overflow: auto;
+      }
+
+      #layersCol .body {
+        overflow: auto;
+      }
+      .layer-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .layer-item[aria-selected="true"] {
+        outline: 2px solid rgba(91, 78, 230, 0.45);
+        border-color: rgba(91, 78, 230, 0.35);
+      }
+      .swatch {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .layer-name {
+        flex: 1;
+        font-weight: 600;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        background: #0f141a;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 8px 12px;
+        color: #e8f1ff;
+        font-size: 13px;
+        display: none;
+      }
+      .toast.ok {
+        border-color: rgba(39, 192, 147, 0.6);
+        box-shadow: 0 0 0 1px rgba(39, 192, 147, 0.35);
+      }
+      .toast.err {
+        border-color: rgba(230, 80, 80, 0.6);
+        box-shadow: 0 0 0 1px rgba(230, 80, 80, 0.35);
+      }
+
+      .pip {
+        position: fixed;
+        left: calc(var(--pad) + env(safe-area-inset-left));
+        bottom: calc(12px + var(--pad) + env(safe-area-inset-bottom));
+        z-index: 6;
+        display: none;
+        gap: 8px;
+        align-items: center;
+      }
+      .pip.show {
+        display: grid;
+      }
+      .pip-inner {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        display: grid;
+        gap: 6px;
+      }
+      #playerMini {
+        width: 120px;
+        height: 120px;
+        border-radius: 10px;
+        background: repeating-conic-gradient(#2a3140 0 25%, #222938 0 50%) 0/18px
+          18px;
+      }
+      .pip button {
+        height: 36px;
+        border-radius: 10px;
+        padding: 0 10px;
+      }
+      @media (min-width: 960px) {
+        .pip {
+          display: none !important;
+        }
+      }
+      body.modal-open {
+        overflow: hidden;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+        padding: 24px;
+      }
+      .modal.show {
+        display: flex;
+      }
+      .modal-dialog {
+        background: var(--panel);
+        border-radius: var(--radius);
+        max-width: 960px;
+        width: 100%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .modal-dialog h3 {
+        margin: 0;
+        padding: var(--pad);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 1.05rem;
+      }
+      .modal-body {
+        padding: var(--pad);
+        overflow: auto;
+        display: grid;
+        gap: var(--pad);
+      }
+      .modal-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .modal-option input {
+        margin: 0;
+      }
+
+      .modal-footer {
+        display: flex;
+        gap: var(--pad);
+        justify-content: flex-end;
+        padding: var(--pad);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .gif-frames-grid {
+        display: grid;
+        gap: var(--pad);
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+      .gif-frame-item {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius);
+        padding: var(--pad);
+        text-align: center;
+      }
+      .gif-frame-item canvas {
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        display: block;
+      }
+      .gif-frame-item span {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app">
+      <div class="title">Voice Rings - Múltiplos (Mobile/Responsive)</div>
+      <div id="meta" class="muted"></div>
+    </header>
+
+    <main>
+      <section class="card" id="controlsCol">
+        <div class="head"><h2>Controles do Anel</h2></div>
+        <div class="body">
+          <div class="panel" id="globalPanel">
+            <div class="row">
+              <label style="flex: 1"
+                ><input type="checkbox" id="gEnable" /> Controle Global</label
+              >
+            </div>
+            <div class="row">
+              <label style="flex: 1"
+                ><input type="checkbox" id="gOsc" checked /> Oscilação</label
+              >
+              <label style="flex: 1"
+                ><input type="checkbox" id="gAmp" checked /> Curvas</label
+              >
+              <label style="flex: 1"
+                ><input type="checkbox" id="gFreq" checked /> Detalhe</label
+              >
+              <label style="flex: 1"
+                ><input type="checkbox" id="gRot" checked /> Rotação</label
+              >
+            </div>
+            <div class="row stack">
+              <label
+                >Intensidade (±%)
+                <input
+                  type="range"
+                  id="gK"
+                  min="-100"
+                  max="100"
+                  value="0"
+                  step="1"
+                />
+                <span id="gKVal">0%</span></label
+              >
+            </div>
+            <div class="row">
+              <label style="flex: 1"
+                >Direção
+                <select id="gDirMode">
+                  <option value="keep">Manter</option>
+                  <option value="cw">Forçar horário</option>
+                  <option value="ccw">Forçar anti-horário</option>
+                </select>
+              </label>
+            </div>
+            <div class="row">
+              <button id="gApply" class="primary" style="flex: 1">
+                Aplicar
+              </button>
+              <button id="gReset" style="flex: 1">Repor</button>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="row">
+              <label style="flex: 2"
+                >Nome <input id="ringName" type="text" placeholder="Anel"
+              /></label>
+              <label
+                >Visível
+                <select id="ringVisible">
+                  <option value="1">Sim</option>
+                  <option value="0">Não</option>
+                </select>
+              </label>
+            </div>
+            <div class="row">
+              <label
+                >Tamanho (diâm.)
+                <input
+                  type="range"
+                  id="size"
+                  min="200"
+                  max="300"
+                  value="240"
+                  step="1"
+                />
+                <span id="sizeVal">240px</span></label
+              >
+            </div>
+            <div class="row">
+              <label
+                >Espessura (px)
+                <input
+                  type="range"
+                  id="thick"
+                  min="2"
+                  max="4"
+                  value="3"
+                  step="0.1"
+                />
+                <span id="thickVal">3.0</span></label
+              >
+            </div>
+            <div class="row">
+              <label
+                >Oscilação (±%)
+                <input
+                  type="range"
+                  id="osc"
+                  min="0"
+                  max="8"
+                  value="4"
+                  step="0.5"
+                />
+                <span id="oscVal">4%</span></label
+              >
+            </div>
+            <div class="row">
+              <label
+                >Curvas (amp)
+                <input
+                  type="range"
+                  id="amp"
+                  min="0"
+                  max="300"
+                  value="100"
+                  step="1"
+                />
+                <span id="ampVal">100%</span></label
+              >
+            </div>
+            <div class="row">
+              <label
+                >Detalhe (freq)
+                <input
+                  type="range"
+                  id="freq"
+                  min="50"
+                  max="200"
+                  value="100"
+                  step="1"
+                />
+                <span id="freqVal">100%</span></label
+              >
+            </div>
+            <div class="row">
+              <label
+                >Vel. rotação
+                <input
+                  type="range"
+                  id="rot"
+                  min="0"
+                  max="1"
+                  value="0.35"
+                  step="0.01"
+                />
+                <span id="rotVal">0.35</span></label
+              >
+              <label style="flex: 1"
+                >Direção
+                <select id="dir">
+                  <option value="1">Horário</option>
+                  <option value="-1">Anti-horário</option>
+                </select>
+              </label>
+            </div>
+            <div class="row">
+              <label
+                >Cor A <input type="color" id="colA" value="#21B2D1"
+              /></label>
+              <label
+                >Cor B <input type="color" id="colB" value="#5B4EE6"
+              /></label>
+              <button id="swapColors" style="min-width: 140px">
+                Inverter cores
+              </button>
+            </div>
+            <small class="muted"
+              >Ajuste os sliders enquanto observa o preview ao centro.</small
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="playerCol">
+        <div class="head"><h2>Pré-visualização</h2></div>
+        <div class="body">
+          <div class="panel divided" aria-label="Canvas Player">
+            <canvas
+              id="player"
+              width="320"
+              height="320"
+              aria-label="Player"
+            ></canvas>
+            <div class="ctrls">
+              <div class="row">
+                <label style="flex: 1 1 auto"
+                  >FPS
+                  <input
+                    type="range"
+                    id="fps"
+                    min="6"
+                    max="60"
+                    value="24"
+                    step="1"
+                  />
+                  <span id="fpsVal">24</span></label
+                >
+                <button id="playPause" style="min-width: 120px">Pausar</button>
+                <button
+                  id="downloadGifBtn"
+                  class="primary"
+                  style="min-width: 140px"
+                >
+                  Baixar GIF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="layersCol">
+        <div class="head"><h2>Camadas</h2></div>
+        <div class="body">
+          <div id="layers" class="layers" aria-label="Lista de anéis"></div>
+          <div class="row">
+            <button id="addRing" class="primary">Adicionar anel</button>
+            <button id="dupRing">Duplicar</button>
+            <button id="delRing">Remover</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="spriteCol">
+        <div class="head"><h2>Sprite Sheet</h2></div>
+        <div class="body">
+          <small id="spriteInfo" class="muted">—</small>
+          <canvas
+            id="sheet"
+            width="2032"
+            height="1360"
+            aria-label="Sprite sheet"
+          ></canvas>
+          <div class="row">
+            <button class="primary" id="renderBtn" style="flex: 1">
+              Gerar
+            </button>
+            <button id="downloadBtn" style="flex: 1">Baixar PNG</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="pip" id="pip">
+      <div class="pip-inner">
+        <canvas
+          id="playerMini"
+          width="160"
+          height="160"
+          aria-label="Mini Player"
+        ></canvas>
+        <div class="row" style="justify-content: center">
+          <button id="pipClose">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast">feito</div>
+    <div id="gifPreviewModal" class="modal" aria-hidden="true">
+      <div class="modal-dialog">
+        <h3>Pré-visualização do GIF</h3>
+        <div class="modal-body">
+          <label class="modal-option" for="gifPreviewNormalize">
+            <input type="checkbox" id="gifPreviewNormalize" />
+            Aplicar normalização de cores
+          </label>
+          <p id="gifPreviewMeta" class="muted"></p>
+          <div id="gifPreviewFrames" class="gif-frames-grid"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="gifPreviewCancel">Cancelar</button>
+          <button id="gifPreviewConfirm" class="primary">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const SPEC = { colsMax: 6, cell: 320, gutter: 16, padding: 16 };
+
+        const meta = document.getElementById("meta");
+        const cvs = document.getElementById("sheet");
+        const ctx = cvs.getContext("2d");
+        const toast = document.getElementById("toast");
+        const spriteInfo = document.getElementById("spriteInfo");
+
+        const playerCard = document.getElementById("playerCol");
+        const player = document.getElementById("player");
+        const pctx = player.getContext("2d");
+        const fpsRange = document.getElementById("fps");
+        const fpsVal = document.getElementById("fpsVal");
+        const playPauseBtn = document.getElementById("playPause");
+
+        const pip = document.getElementById("pip");
+        const pipClose = document.getElementById("pipClose");
+        const playerMini = document.getElementById("playerMini");
+        const mctx = playerMini.getContext("2d");
+
+        const layersEl = document.getElementById("layers");
+        const addRingBtn = document.getElementById("addRing");
+        const dupRingBtn = document.getElementById("dupRing");
+        const delRingBtn = document.getElementById("delRing");
+
+        const ringName = document.getElementById("ringName");
+        const ringVisible = document.getElementById("ringVisible");
+        const sizeRange = document.getElementById("size");
+        const sizeVal = document.getElementById("sizeVal");
+        const thickRange = document.getElementById("thick");
+        const thickVal = document.getElementById("thickVal");
+        const oscRange = document.getElementById("osc");
+        const oscVal = document.getElementById("oscVal");
+        const ampRange = document.getElementById("amp");
+        const ampVal = document.getElementById("ampVal");
+        const freqRange = document.getElementById("freq");
+        const freqVal = document.getElementById("freqVal");
+        const rotRange = document.getElementById("rot");
+        const rotVal = document.getElementById("rotVal");
+        const dirSel = document.getElementById("dir");
+        const colA = document.getElementById("colA");
+        const colB = document.getElementById("colB");
+        const swapColors = document.getElementById("swapColors");
+
+        const renderBtn = document.getElementById("renderBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const downloadGifBtn = document.getElementById("downloadGifBtn");
+        const gifPreviewModal = document.getElementById("gifPreviewModal");
+        const gifPreviewMeta = document.getElementById("gifPreviewMeta");
+        const gifPreviewFrames = document.getElementById("gifPreviewFrames");
+        const gifPreviewCancel = document.getElementById("gifPreviewCancel");
+        const gifPreviewConfirm = document.getElementById("gifPreviewConfirm");
+        const gifPreviewNormalize = document.getElementById("gifPreviewNormalize");
+
+        const gEnable = document.getElementById("gEnable");
+        const gOsc = document.getElementById("gOsc");
+        const gAmp = document.getElementById("gAmp");
+        const gFreq = document.getElementById("gFreq");
+        const gRot = document.getElementById("gRot");
+        const gDirMode = document.getElementById("gDirMode");
+        const gK = document.getElementById("gK");
+        const gKVal = document.getElementById("gKVal");
+        let draggingK = false;
+        let rafK = 0;
+        const gApply = document.getElementById("gApply");
+        const gReset = document.getElementById("gReset");
+
+        let nextId = 1;
+        const mkRing = (name = "Anel") => ({
+          id: nextId++,
+          name,
+          visible: true,
+          baseRadius: 120,
+          expandPct: 0.04,
+          lineWidthBase: 3.0,
+          ampScale: 1.0,
+          freqScale: 1.0,
+          ripple1Amp: 2.0,
+          ripple1Freq: 6,
+          ripple2Amp: 1.2,
+          ripple2Freq: 11,
+          rotateBase: 0.35,
+          rotateSign: 1,
+          alpha: 0.82,
+          colorA: "#21B2D1",
+          colorB: "#5B4EE6",
+        });
+
+        let rings = [mkRing("Anel 1")];
+        let active = rings[0].id;
+
+        let pendingGifData = null;
+        let gifPreviewLoading = false;
+
+        const getFrames = () => Math.max(6, Math.round(Number(fpsRange.value)));
+        const gridFor = (frames) => {
+          const cols = Math.min(SPEC.colsMax, frames);
+          const rows = Math.ceil(frames / cols);
+          return { cols, rows };
+        };
+        const atlasSize = (frames) => {
+          const { cols, rows } = gridFor(frames);
+          const w =
+            SPEC.padding * 2 + cols * SPEC.cell + (cols - 1) * SPEC.gutter;
+          const h =
+            SPEC.padding * 2 + rows * SPEC.cell + (rows - 1) * SPEC.gutter;
+          return { w, h, cols, rows };
+        };
+        const frameXY = (i, frames) => {
+          const { cols } = gridFor(frames);
+          const c = i % cols;
+          const r = Math.floor(i / cols);
+          return {
+            x: SPEC.padding + c * (SPEC.cell + SPEC.gutter),
+            y: SPEC.padding + r * (SPEC.cell + SPEC.gutter),
+          };
+        };
+
+        const haptic = (ms = 12) => {
+          if (navigator.vibrate)
+            try {
+              navigator.vibrate(ms);
+            } catch {}
+        };
+        const showToast = (msg, ok = true) => {
+          toast.textContent = msg;
+          toast.classList.toggle("ok", ok);
+          toast.classList.toggle("err", !ok);
+          toast.style.display = "block";
+          try {
+            if (navigator.vibrate) navigator.vibrate(ok ? 12 : 30);
+          } catch {}
+          setTimeout(() => {
+            toast.style.display = "none";
+          }, 1200);
+        };
+        const hexToRGBA = (hex, a = 1) => {
+          const n = hex.replace("#", "");
+          const bigint = parseInt(n, 16);
+          const r = (bigint >> 16) & 255,
+            g = (bigint >> 8) & 255,
+            b = bigint & 255;
+          return `rgba(${r},${g},${b},${a})`;
+        };
+        const hexToRGB = (hex) => {
+          const n = hex.replace("#", "");
+          const bigint = parseInt(n, 16);
+          return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+        };
+
+        const ringById = (id) => rings.find((r) => r.id === id);
+        const activeRing = () => ringById(active);
+
+        const renderLayersUI = () => {
+          layersEl.innerHTML = "";
+          rings.forEach((r) => {
+            const row = document.createElement("div");
+            row.className = "layer-item";
+            row.setAttribute("aria-selected", String(r.id === active));
+            const sw = document.createElement("div");
+            sw.className = "swatch";
+            sw.style.background = `linear-gradient(135deg, ${r.colorA}, ${r.colorB})`;
+            const name = document.createElement("div");
+            name.className = "layer-name";
+            name.textContent = r.name;
+            const vis = document.createElement("button");
+            vis.textContent = r.visible ? "Ocultar" : "Mostrar";
+            vis.style.minWidth = "92px";
+            const sel = document.createElement("button");
+            sel.textContent = r.id === active ? "Selecionado" : "Selecionar";
+            sel.style.minWidth = "108px";
+            vis.addEventListener("click", () => {
+              r.visible = !r.visible;
+              renderLayersUI();
+              drawCompositePreview();
+            });
+            sel.addEventListener("click", () => {
+              active = r.id;
+              renderLayersUI();
+              syncControls();
+              drawCompositePreview();
+            });
+            row.append(sw, name, vis, sel);
+            layersEl.appendChild(row);
+          });
+        };
+
+        const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+        const TWO_PI = Math.PI * 2;
+
+        const globalCtrl = {
+          enabled: false,
+          params: { osc: true, amp: true, freq: true, rot: true },
+          dirMode: "keep",
+          k: 0,
+          snap: null,
+          kActive: false,
+        };
+
+        const deepCopy = (o) => JSON.parse(JSON.stringify(o));
+
+        const computeBounds = (source = rings) => {
+          const b = {
+            osc: { min: Infinity, max: -Infinity },
+            amp: { min: Infinity, max: -Infinity },
+            freq: { min: Infinity, max: -Infinity },
+            rot: { min: Infinity, max: -Infinity },
+          };
+          source.forEach((r) => {
+            b.osc.min = Math.min(b.osc.min, r.expandPct);
+            b.osc.max = Math.max(b.osc.max, r.expandPct);
+            b.amp.min = Math.min(b.amp.min, r.ampScale);
+            b.amp.max = Math.max(b.amp.max, r.ampScale);
+            b.freq.min = Math.min(b.freq.min, r.freqScale);
+            b.freq.max = Math.max(b.freq.max, r.freqScale);
+            b.rot.min = Math.min(b.rot.min, r.rotateBase);
+            b.rot.max = Math.max(b.rot.max, r.rotateBase);
+          });
+          Object.values(b).forEach((o) => (o.range = o.max - o.min));
+          return b;
+        };
+
+        const applyScale = (base, k, min, max) =>
+          clamp(base * (1 + k), min, max);
+
+        const effectiveRing = (r, bounds) => {
+          const R = Object.assign({}, r);
+          const k = globalCtrl.k;
+          const usingGlobal = globalCtrl.enabled;
+          const useK = globalCtrl.kActive;
+          if (!(usingGlobal || useK)) return R;
+          const affect = usingGlobal || r.id === active;
+          if (!affect) return R;
+          if (usingGlobal) {
+            if (globalCtrl.params.osc)
+              R.expandPct = applyScale(
+                r.expandPct,
+                k,
+                bounds.osc.min,
+                bounds.osc.max
+              );
+            if (globalCtrl.params.amp)
+              R.ampScale = applyScale(
+                r.ampScale,
+                k,
+                bounds.amp.min,
+                bounds.amp.max
+              );
+            if (globalCtrl.params.freq)
+              R.freqScale = applyScale(
+                r.freqScale,
+                k,
+                bounds.freq.min,
+                bounds.freq.max
+              );
+            if (globalCtrl.params.rot)
+              R.rotateBase = applyScale(
+                r.rotateBase,
+                k,
+                bounds.rot.min,
+                bounds.rot.max
+              );
+            if (globalCtrl.dirMode === "cw") R.rotateSign = 1;
+            else if (globalCtrl.dirMode === "ccw") R.rotateSign = -1;
+          } else {
+            if (globalCtrl.params.osc)
+              R.expandPct = applyScale(r.expandPct, k, 0, 0.08);
+            if (globalCtrl.params.amp)
+              R.ampScale = applyScale(r.ampScale, k, 0, 3);
+            if (globalCtrl.params.freq)
+              R.freqScale = applyScale(r.freqScale, k, 0.5, 2);
+            if (globalCtrl.params.rot)
+              R.rotateBase = applyScale(r.rotateBase, k, 0, 1);
+          }
+          return R;
+        };
+
+        const displayRing = (r) => effectiveRing(r, computeBounds());
+
+        const setParamLocks = () => {
+          const lock = globalCtrl.kActive;
+          const lockOsc = lock && globalCtrl.params.osc;
+          const lockAmp = lock && globalCtrl.params.amp;
+          const lockFreq = lock && globalCtrl.params.freq;
+          const lockRot = lock && globalCtrl.params.rot;
+          oscRange.disabled = lockOsc;
+          ampRange.disabled = lockAmp;
+          freqRange.disabled = lockFreq;
+          rotRange.disabled = lockRot;
+          dirSel.disabled =
+            lock && globalCtrl.enabled && globalCtrl.dirMode !== "keep";
+        };
+
+        const syncControls = () => {
+          const r = activeRing();
+          if (!r) return;
+          const d = displayRing(r);
+          ringName.value = r.name;
+          ringVisible.value = r.visible ? "1" : "0";
+          sizeRange.value = String(clamp(r.baseRadius * 2, 200, 300));
+          sizeVal.textContent = sizeRange.value + "px";
+          thickRange.value = String(clamp(r.lineWidthBase, 2, 4));
+          thickVal.textContent = thickRange.value;
+          oscRange.value = String(clamp(d.expandPct * 100, 0, 8));
+          oscVal.textContent = Math.round(d.expandPct * 100) + "%";
+          ampRange.value = String(clamp(d.ampScale * 100, 0, 300));
+          ampVal.textContent = Math.round(d.ampScale * 100) + "%";
+          freqRange.value = String(clamp(d.freqScale * 100, 50, 200));
+          freqVal.textContent = Math.round(d.freqScale * 100) + "%";
+          rotRange.value = String(clamp(d.rotateBase, 0, 1));
+          rotVal.textContent = rotRange.value;
+          dirSel.value = String(d.rotateSign);
+          colA.value = r.colorA;
+          colB.value = r.colorB;
+          setParamLocks();
+        };
+
+        const bindControls = () => {
+          ringName.addEventListener("input", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.name = ringName.value || "Anel " + r.id;
+            renderLayersUI();
+          });
+          ringVisible.addEventListener("change", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.visible = ringVisible.value === "1";
+            renderLayersUI();
+            drawCompositePreview();
+          });
+          sizeRange.addEventListener("input", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.baseRadius = Number(sizeRange.value) / 2;
+            sizeVal.textContent = sizeRange.value + "px";
+            drawCompositePreview();
+          });
+          thickRange.addEventListener("input", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.lineWidthBase = Number(thickRange.value);
+            thickVal.textContent = thickRange.value;
+            drawCompositePreview();
+          });
+
+          oscRange.addEventListener("input", () => {
+            if (oscRange.disabled) return;
+            const r = activeRing();
+            if (!r) return;
+            r.expandPct = Number(oscRange.value) / 100;
+            oscVal.textContent = oscRange.value + "%";
+            drawCompositePreview();
+          });
+          ampRange.addEventListener("input", () => {
+            if (ampRange.disabled) return;
+            const r = activeRing();
+            if (!r) return;
+            r.ampScale = Number(ampRange.value) / 100;
+            ampVal.textContent = ampRange.value + "%";
+            drawCompositePreview();
+          });
+          freqRange.addEventListener("input", () => {
+            if (freqRange.disabled) return;
+            const r = activeRing();
+            if (!r) return;
+            r.freqScale = Number(freqRange.value) / 100;
+            freqVal.textContent = freqRange.value + "%";
+            drawCompositePreview();
+          });
+          rotRange.addEventListener("input", () => {
+            if (rotRange.disabled) return;
+            const r = activeRing();
+            if (!r) return;
+            r.rotateBase = Number(rotRange.value);
+            rotVal.textContent = rotRange.value;
+            drawCompositePreview();
+          });
+
+          dirSel.addEventListener("change", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.rotateSign = Number(dirSel.value);
+            drawCompositePreview();
+          });
+          colA.addEventListener("input", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.colorA = colA.value;
+            renderLayersUI();
+            drawCompositePreview();
+          });
+          colB.addEventListener("input", () => {
+            const r = activeRing();
+            if (!r) return;
+            r.colorB = colB.value;
+            renderLayersUI();
+            drawCompositePreview();
+          });
+          swapColors.addEventListener("click", () => {
+            const r = activeRing();
+            if (!r) return;
+            const t = r.colorA;
+            r.colorA = r.colorB;
+            r.colorB = t;
+            colA.value = r.colorA;
+            colB.value = r.colorB;
+            renderLayersUI();
+            drawCompositePreview();
+            haptic();
+          });
+        };
+
+        const drawRing = (ctx, i, FR, R) => {
+          const tNorm = (i % FR) / FR;
+          const SZ = ctx.canvas.width;
+          const cx = SZ / 2,
+            cy = SZ / 2;
+          const s = SZ / SPEC.cell;
+          const breathe = Math.sin(tNorm * TWO_PI);
+          const baseR = R.baseRadius * s;
+          const radius = baseR * (1 + R.expandPct * breathe);
+          const k1 = Math.max(0, Math.round(R.rotateBase * 8));
+          const k2 = Math.max(0, Math.round((k1 * 11) / 6));
+          const phase1 = TWO_PI * (k1 * (i / FR)) * R.rotateSign;
+          const phase2 = TWO_PI * (k2 * (i / FR)) * R.rotateSign;
+          const amp1 = R.ripple1Amp * R.ampScale * s;
+          const amp2 = R.ripple2Amp * R.ampScale * s;
+          const f1 = R.ripple1Freq * R.freqScale;
+          const f2 = R.ripple2Freq * R.freqScale;
+          const thick = clamp(R.lineWidthBase, 2, 4) * s;
+          const steps = Math.min(
+            4096,
+            Math.max(1024, Math.round(1024 * R.freqScale))
+          );
+          const dA = (Math.PI * 2) / steps;
+          const a0 = 0;
+          let rr0 =
+            radius +
+            amp1 * Math.sin(a0 * f1 + phase1) +
+            amp2 * Math.sin(a0 * f2 + phase2 + 0.7);
+          let x0 = rr0 * Math.cos(a0),
+            y0 = rr0 * Math.sin(a0);
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          for (let sIdx = 1; sIdx < steps; sIdx++) {
+            const a = a0 + sIdx * dA;
+            const rr =
+              radius +
+              amp1 * Math.sin(a * f1 + phase1) +
+              amp2 * Math.sin(a * f2 + phase2 + 0.7);
+            ctx.lineTo(rr * Math.cos(a), rr * Math.sin(a));
+          }
+          ctx.lineTo(x0, y0);
+          const grad = ctx.createLinearGradient(-cx, -cy, cx, cy);
+          grad.addColorStop(0, hexToRGBA(R.colorA, R.alpha));
+          grad.addColorStop(1, hexToRGBA(R.colorB, R.alpha));
+          ctx.lineWidth = Math.max(1, thick);
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.miterLimit = 2;
+          ctx.strokeStyle = grad;
+          ctx.stroke();
+          ctx.restore();
+        };
+
+        let playing = true;
+        let lastTime = 0;
+        let acc = 0;
+        let frame = 0;
+        let fps = Number(fpsRange.value);
+        const drawCompositePreview = (i = frame) => {
+          const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+          const sizeCss = Math.max(120, player.clientWidth || 320);
+          const target = Math.max(120, Math.round(sizeCss * dpr));
+          if (player.width !== target || player.height !== target) {
+            player.width = player.height = target;
+          }
+          pctx.clearRect(0, 0, player.width, player.height);
+          if (playerMini) {
+            const sizeMiniCss = playerMini.clientWidth || 120;
+            const targetMini = Math.max(120, Math.round(sizeMiniCss * dpr));
+            if (
+              playerMini.width !== targetMini ||
+              playerMini.height !== targetMini
+            ) {
+              playerMini.width = playerMini.height = targetMini;
+            }
+            mctx.clearRect(0, 0, playerMini.width, playerMini.height);
+          }
+          const FR = getFrames();
+          const bounds = computeBounds();
+          rings.forEach((r) => {
+            if (r.visible) {
+              const eff = effectiveRing(r, bounds);
+              drawRing(pctx, i, FR, eff);
+              if (playerMini) drawRing(mctx, i, FR, eff);
+            }
+          });
+        };
+        const tick = (now) => {
+          if (!playing) {
+            requestAnimationFrame(tick);
+            return;
+          }
+          if (!lastTime) lastTime = now;
+          const dt = now - lastTime;
+          lastTime = now;
+          acc += dt;
+          const frameDuration = 1000 / fps;
+          while (acc >= frameDuration) {
+            frame = (frame + 1) % getFrames();
+            acc -= frameDuration;
+          }
+          drawCompositePreview(frame);
+          requestAnimationFrame(tick);
+        };
+
+        const tileProc =
+          typeof OffscreenCanvas !== "undefined"
+            ? new OffscreenCanvas(SPEC.cell, SPEC.cell)
+            : (() => {
+                const c = document.createElement("canvas");
+                c.width = SPEC.cell;
+                c.height = SPEC.cell;
+                return c;
+              })();
+        const tproc = tileProc.getContext("2d");
+
+        const drawSpriteAtlas = async (
+          ringsSnap,
+          FR,
+          { updateInfo = true, toast = true } = {}
+        ) => {
+          const { w, h, cols, rows } = atlasSize(FR);
+          if (cvs.width !== w || cvs.height !== h) {
+            cvs.width = w;
+            cvs.height = h;
+          }
+          ctx.clearRect(0, 0, w, h);
+          if (updateInfo) {
+            spriteInfo.textContent = `${w}x${h} | ${FR} frames (${cols}x${rows}) | Fundo transparente`;
+          }
+          const bounds = computeBounds(ringsSnap);
+          for (let i = 0; i < FR; i++) {
+            tproc.clearRect(0, 0, SPEC.cell, SPEC.cell);
+            for (const r of ringsSnap) {
+              if (!r.visible) continue;
+              const eff = effectiveRing(r, bounds);
+              drawRing(tproc, i, FR, eff);
+            }
+            const { x, y } = frameXY(i, FR);
+            ctx.drawImage(tileProc, x, y);
+            if (i % 6 === 0)
+              await new Promise((resolve) => setTimeout(resolve));
+          }
+          if (toast) showToast("Sprite gerado", true);
+          return { w, h, cols, rows };
+        };
+
+        const render = async () => {
+          const FR = Math.max(6, Math.round(Number(fpsRange.value)));
+          const ringsSnap = deepCopy(rings);
+          await drawSpriteAtlas(ringsSnap, FR);
+        };
+
+        const savePNG = async () => {
+          try {
+            const FR = getFrames();
+            const ringsSnap = deepCopy(rings);
+            await drawSpriteAtlas(ringsSnap, FR, {
+              updateInfo: true,
+              toast: false,
+            });
+            const blob = await new Promise((res) =>
+              cvs.toBlob(res, "image/png")
+            );
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const ts = new Date().toISOString().replace(/[:.]/g, "-");
+            a.href = url;
+            a.download = `voice-rings_sprite_${cvs.width}x${cvs.height}_${FR}f_${ts}.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast("PNG salvo", true);
+          } catch (e) {
+            console.error(e);
+            showToast("Erro ao salvar PNG", false);
+          }
+        };
+
+        const buildPalette = (sourceRings = rings) => {
+          const maxColors = 255;
+          const perRing = Math.max(
+            16,
+            Math.floor(240 / Math.max(1, sourceRings.length))
+          );
+          const colors = [];
+          sourceRings.forEach((r) => {
+            const A = hexToRGB(r.colorA),
+              B = hexToRGB(r.colorB);
+            for (let i = 0; i < perRing; i++) {
+              const t = i / (perRing - 1);
+              colors.push([
+                (A[0] + (B[0] - A[0]) * t) | 0,
+                (A[1] + (B[1] - A[1]) * t) | 0,
+                (A[2] + (B[2] - A[2]) * t) | 0,
+              ]);
+            }
+          });
+          while (colors.length > maxColors) colors.pop();
+          const pal = new Uint8Array(256 * 3);
+          pal[0] = 0;
+          pal[1] = 0;
+          pal[2] = 0;
+          for (let i = 0; i < colors.length; i++) {
+            const idx = (1 + i) * 3;
+            const c = colors[i];
+            pal[idx] = c[0];
+            pal[idx + 1] = c[1];
+            pal[idx + 2] = c[2];
+          }
+          const used = colors.length + 1;
+          const colorCount = colors.length;
+          const nearestIndex = (r, g, b, a) => {
+            if (a < 16) return 0;
+            let best = 1,
+              bestd = 1e9;
+            for (let i = 1; i < used; i++) {
+              const k = i * 3;
+              const dr = r - pal[k],
+                dg = g - pal[k + 1],
+                db = b - pal[k + 2];
+              const d = dr * dr + dg * dg + db * db;
+              if (d < bestd) {
+                bestd = d;
+                best = i;
+                if (d === 0) break;
+              }
+            }
+            return best;
+          };
+          return { pal, nearestIndex, colorCount };
+        };
+
+        const GifWriter = (width, height, palette) => {
+          const bytes = [];
+          const w8 = (v) => bytes.push(v & 255);
+          const w16 = (v) => {
+            bytes.push(v & 255, (v >> 8) & 255);
+          };
+          const wArr = (a) => {
+            for (let i = 0; i < a.length; i++) bytes.push(a[i]);
+          };
+
+          wArr([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]); // GIF89a
+          w16(width);
+          w16(height);
+          w8(0xf7); // GCT: 256 cores, resolução 8 bits
+          w8(0x00); // bg = 0
+          w8(0x00); // pixel aspect
+          wArr(palette);
+
+          // NETSCAPE2.0 loop forever
+          wArr([
+            0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45,
+            0x32, 0x2e, 0x30, 0x03, 0x01, 0x00, 0x00, 0x00,
+          ]);
+
+          const writeImage = (
+            indexed,
+            delayCs = 4,
+            transparentIndex = 0,
+            dispose = 2
+          ) => {
+            wArr([0x21, 0xf9, 0x04]); // GCE
+            w8(((dispose & 7) << 2) | 0x01); // transparency flag
+            w16(delayCs); // delay in centiseconds
+            w8(transparentIndex); // transparent index
+            w8(0);
+            w8(0x2c); // Image Descriptor
+            w16(0);
+            w16(0);
+            w16(width);
+            w16(height);
+            w8(0x00); // no LCT
+            const minCode = 8;
+            w8(minCode);
+            const lzw = lzwEncode(indexed, minCode);
+            for (let off = 0; off < lzw.length; ) {
+              const size = Math.min(255, lzw.length - off);
+              w8(size);
+              wArr(lzw.subarray(off, off + size));
+              off += size;
+            }
+            w8(0x00); // block terminator
+          };
+
+          const addFrameIndexed = (
+            indexed,
+            delayCs = 4,
+            transparentIndex = 0,
+            dispose = 2
+          ) => {
+            writeImage(indexed, delayCs, transparentIndex, dispose);
+          };
+
+          const end = () => {
+            w8(0x3b);
+            return new Uint8Array(bytes);
+          }; // trailer
+          // mantém setNearest/addFrame por compatibilidade (não usados aqui)
+          let nearestIndexRef = () => 0;
+          const setNearest = (fn) => {
+            nearestIndexRef = fn;
+          };
+          const addFrame = (
+            rgba,
+            delayCs = 4,
+            transparentIndex = 0,
+            dispose = 2
+          ) => {
+            const indexed = new Uint8Array(width * height);
+            for (let y = 0, p = 0, idx = 0; y < height; y++) {
+              for (let x = 0; x < width; x++, p += 4, idx++) {
+                indexed[idx] = nearestIndexRef(
+                  rgba[p],
+                  rgba[p + 1],
+                  rgba[p + 2],
+                  rgba[p + 3],
+                  x,
+                  y
+                );
+              }
+            }
+            writeImage(indexed, delayCs, transparentIndex, dispose);
+          };
+          return { addFrameIndexed, addFrame, setNearest, end };
+        };
+
+        function lzwEncode(indexed, minCode) {
+          const CLEAR = 1 << minCode,
+            END = CLEAR + 1;
+          let codeSize = minCode + 1,
+            dictSize = END + 1;
+          const MAX = 4096;
+          const out = [];
+          let cur = 0,
+            curBits = 0;
+          const push = (code) => {
+            cur |= code << curBits;
+            curBits += codeSize;
+            while (curBits >= 8) {
+              out.push(cur & 255);
+              cur >>= 8;
+              curBits -= 8;
+            }
+          };
+          push(CLEAR);
+          const map = new Map();
+          for (let i = 0; i < CLEAR; i++) map.set(i + ",", i);
+          let w = [];
+          for (let i = 0; i < indexed.length; i++) {
+            const k = indexed[i];
+            const wk = w.concat(k);
+            const key = wk.join(",");
+            if (map.has(key)) {
+              w = wk;
+            } else {
+              push(map.get(w.join(",")));
+              if (dictSize < MAX) {
+                map.set(key, dictSize++);
+                if (dictSize === 1 << codeSize && codeSize < 12) codeSize++;
+              } else {
+                push(CLEAR);
+                map.clear();
+                for (let j = 0; j < CLEAR; j++) map.set(j + ",", j);
+                codeSize = minCode + 1;
+                dictSize = END + 1;
+              }
+              w = [k];
+            }
+          }
+          if (w.length) push(map.get(w.join(",")));
+          push(END);
+          if (curBits > 0) out.push(cur & 255);
+          return new Uint8Array(out);
+        }
+
+        const ensureNormalizedFrame = (frame, pal) => {
+          if (frame.normalized) return frame.normalized;
+          const normalized = new ImageData(SPEC.cell, SPEC.cell);
+          const dest = normalized.data;
+          for (let i = 0, p = 0; i < frame.indexed.length; i++, p += 4) {
+            const idx = frame.indexed[i];
+            if (idx === 0) {
+              dest[p] = 0;
+              dest[p + 1] = 0;
+              dest[p + 2] = 0;
+              dest[p + 3] = 0;
+              continue;
+            }
+            const palIdx = idx * 3;
+            dest[p] = pal[palIdx];
+            dest[p + 1] = pal[palIdx + 1];
+            dest[p + 2] = pal[palIdx + 2];
+            dest[p + 3] = 255;
+          }
+          frame.normalized = normalized;
+          return normalized;
+        };
+
+        const prepareGifData = async () => {
+          const FR = Math.max(6, Math.round(Number(fpsRange.value)));
+          const delayCs = Math.max(1, Math.round(1000 / FR / 10));
+          const ringsSnap = deepCopy(rings);
+          await drawSpriteAtlas(ringsSnap, FR, {
+            updateInfo: true,
+            toast: false,
+          });
+          const paletteInfo = buildPalette(ringsSnap);
+          const frames = [];
+          for (let i = 0; i < FR; i++) {
+            const { x, y } = frameXY(i, FR);
+            const raw = ctx.getImageData(x, y, SPEC.cell, SPEC.cell);
+            const data = raw.data;
+            const indexed = new Uint8Array(SPEC.cell * SPEC.cell);
+            for (let yy = 0, p = 0, idx = 0; yy < SPEC.cell; yy++) {
+              for (let xx = 0; xx < SPEC.cell; xx++, idx++, p += 4) {
+                const a = data[p + 3];
+                if (a < 24) {
+                  indexed[idx] = 0;
+                  continue;
+                }
+                indexed[idx] = paletteInfo.nearestIndex(
+                  data[p],
+                  data[p + 1],
+                  data[p + 2],
+                  255,
+                  xx,
+                  yy
+                );
+              }
+            }
+            frames.push({
+              raw,
+              indexed,
+              normalized: null,
+              canvas: null,
+              ctx: null,
+            });
+            if (i % 6 === 0) await new Promise((resolve) => setTimeout(resolve));
+          }
+          return {
+            FR,
+            delayCs,
+            pal: paletteInfo.pal,
+            colorCount: paletteInfo.colorCount,
+            frames,
+          };
+        };
+
+        const mountGifPreviewFrames = (data) => {
+          gifPreviewFrames.innerHTML = "";
+          data.frames.forEach((frame, index) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "gif-frame-item";
+            const c = document.createElement("canvas");
+            c.width = SPEC.cell;
+            c.height = SPEC.cell;
+            wrapper.appendChild(c);
+            const caption = document.createElement("span");
+            caption.textContent = `Frame ${index + 1}`;
+            wrapper.appendChild(caption);
+            gifPreviewFrames.appendChild(wrapper);
+            frame.canvas = c;
+            frame.ctx = c.getContext("2d");
+          });
+        };
+
+        const updateGifPreviewFrames = (normalize) => {
+          if (!pendingGifData) return;
+          pendingGifData.frames.forEach((frame) => {
+            if (!frame.ctx) return;
+            const img = normalize
+              ? ensureNormalizedFrame(frame, pendingGifData.pal)
+              : frame.raw;
+            frame.ctx.putImageData(img, 0, 0);
+          });
+        };
+
+        const formatGifMeta = (data) => {
+          const approxMs = data.delayCs * 10;
+          return `${data.FR} frames | ${data.delayCs} cs por frame (~${approxMs} ms) | Paleta ${data.colorCount} cores`;
+        };
+
+        const toggleGifPreviewModal = (show) => {
+          document.body.classList.toggle("modal-open", show);
+          gifPreviewModal.classList.toggle("show", show);
+          gifPreviewModal.setAttribute("aria-hidden", show ? "false" : "true");
+        };
+
+        const resetGifPreviewState = () => {
+          gifPreviewNormalize.checked = false;
+          gifPreviewNormalize.disabled = false;
+          gifPreviewConfirm.disabled = false;
+          gifPreviewCancel.disabled = false;
+          gifPreviewMeta.textContent = "";
+          gifPreviewFrames.innerHTML = "";
+          pendingGifData = null;
+        };
+
+        const openGifPreview = async () => {
+          if (gifPreviewLoading) return;
+          gifPreviewLoading = true;
+          downloadGifBtn.disabled = true;
+          gifPreviewConfirm.disabled = true;
+          gifPreviewCancel.disabled = true;
+          gifPreviewNormalize.checked = false;
+          gifPreviewNormalize.disabled = true;
+          gifPreviewMeta.textContent = "Preparando preview...";
+          gifPreviewFrames.innerHTML = "";
+          toggleGifPreviewModal(true);
+          haptic();
+          try {
+            const data = await prepareGifData();
+            pendingGifData = data;
+            mountGifPreviewFrames(data);
+            updateGifPreviewFrames(false);
+            gifPreviewMeta.textContent = formatGifMeta(data);
+            gifPreviewConfirm.disabled = false;
+            gifPreviewCancel.disabled = false;
+            gifPreviewNormalize.disabled = false;
+          } catch (e) {
+            console.error(e);
+            showToast("Erro ao preparar preview do GIF", false);
+            toggleGifPreviewModal(false);
+            resetGifPreviewState();
+          } finally {
+            gifPreviewLoading = false;
+            downloadGifBtn.disabled = false;
+          }
+        };
+
+        const closeGifPreview = () => {
+          toggleGifPreviewModal(false);
+          resetGifPreviewState();
+        };
+
+        const saveGifFromPending = async () => {
+          if (!pendingGifData || gifPreviewLoading) return;
+          gifPreviewLoading = true;
+          gifPreviewConfirm.disabled = true;
+          gifPreviewCancel.disabled = true;
+          gifPreviewNormalize.disabled = true;
+          gifPreviewMeta.textContent = "Gerando GIF...";
+          try {
+            const enc = GifWriter(SPEC.cell, SPEC.cell, pendingGifData.pal);
+            for (let i = 0; i < pendingGifData.frames.length; i++) {
+              enc.addFrameIndexed(
+                pendingGifData.frames[i].indexed,
+                pendingGifData.delayCs,
+                0,
+                2
+              );
+              if (i % 6 === 0)
+                await new Promise((resolve) => setTimeout(resolve));
+            }
+            const u8 = enc.end();
+            const blob = new Blob([u8], { type: "image/gif" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const ts = new Date().toISOString().replace(/[:.]/g, "-");
+            a.href = url;
+            a.download = `voice-rings_${pendingGifData.FR}f_${pendingGifData.delayCs}cs.gif`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast("GIF salvo V", true);
+            closeGifPreview();
+          } catch (e) {
+            console.error(e);
+            showToast("Erro ao salvar GIF", false);
+            gifPreviewConfirm.disabled = false;
+            gifPreviewCancel.disabled = false;
+            gifPreviewNormalize.disabled = false;
+          } finally {
+            gifPreviewLoading = false;
+          }
+        };
+
+        addRingBtn.addEventListener("click", () => {
+          rings.push(mkRing(`Anel ${rings.length + 1}`));
+          active = rings[rings.length - 1].id;
+          renderLayersUI();
+          syncControls();
+          drawCompositePreview();
+          haptic();
+          updateMeta();
+        });
+        dupRingBtn.addEventListener("click", () => {
+          const r = activeRing();
+          if (!r) return;
+          const copy = JSON.parse(JSON.stringify(r));
+          delete copy.id;
+          copy.name = r.name + " (cópia)";
+          const inst = mkRing(copy.name);
+          Object.assign(inst, copy, { id: inst.id });
+          rings.push(inst);
+          active = inst.id;
+          renderLayersUI();
+          syncControls();
+          drawCompositePreview();
+          haptic();
+          updateMeta();
+        });
+        delRingBtn.addEventListener("click", () => {
+          if (rings.length <= 1) {
+            showToast("Mantenha ao menos 1 anel", false);
+            return;
+          }
+          const idx = rings.findIndex((x) => x.id === active);
+          if (idx >= 0) {
+            rings.splice(idx, 1);
+            active = rings[Math.max(0, idx - 1)].id;
+            renderLayersUI();
+            syncControls();
+            drawCompositePreview();
+            haptic();
+            updateMeta();
+          }
+        });
+
+        const updateMeta = () => {
+          const FR = getFrames();
+          const { w, h, cols, rows } = atlasSize(FR);
+          meta.textContent = `${w}x${h} | ${FR}f @ ${fps | 0} fps | ${
+            rings.length
+          } anel(is)`;
+        };
+        fpsRange.addEventListener("input", () => {
+          fps = Number(fpsRange.value);
+          fpsVal.textContent = fps;
+          updateMeta();
+          drawCompositePreview();
+        });
+        playPauseBtn.addEventListener("click", () => {
+          playing = !playing;
+          playPauseBtn.textContent = playing ? "Pausar" : "Reproduzir";
+          showToast(playing ? "Reproduzindo" : "Pausado", true);
+        });
+        downloadGifBtn.addEventListener("click", openGifPreview);
+        gifPreviewCancel.addEventListener("click", () => {
+          haptic();
+          closeGifPreview();
+        });
+        gifPreviewConfirm.addEventListener("click", async () => {
+          haptic();
+          await saveGifFromPending();
+        });
+        gifPreviewNormalize.addEventListener("change", () => {
+          if (!pendingGifData) return;
+          haptic();
+          updateGifPreviewFrames(gifPreviewNormalize.checked);
+        });
+
+        let pipForced = false;
+        const io = new IntersectionObserver(
+          (entries) => {
+            const e = entries[0];
+            if (pipForced) return;
+            const show = !e.isIntersecting;
+            pip.classList.toggle("show", show);
+            if (show) drawCompositePreview(frame);
+          },
+          { threshold: 0.6 }
+        );
+        io.observe(playerCard);
+        pipClose.addEventListener("click", () => {
+          pipForced = true;
+          pip.classList.remove("show");
+          haptic();
+        });
+        document.addEventListener("focusin", (ev) => {
+          if (
+            window.matchMedia("(min-width: 960px), (min-aspect-ratio: 1/1)")
+              .matches
+          )
+            return;
+          if (ev.target.closest(".controls") || ev.target.closest(".ctrls")) {
+            pipForced = true;
+            pip.classList.add("show");
+            drawCompositePreview(frame);
+          }
+        });
+        document.addEventListener("focusout", () => {
+          pipForced = false;
+        });
+
+        const renderBtnClick = async () => {
+          await render();
+          frame = 0;
+          drawCompositePreview(0);
+          updateMeta();
+        };
+        renderBtn.addEventListener("click", renderBtnClick);
+        downloadBtn.addEventListener("click", savePNG);
+
+        function assert(cond, msg) {
+          if (!cond) throw new Error(msg);
+        }
+        async function runSmokeTests() {
+          const FR = getFrames();
+          const { w, h } = atlasSize(FR);
+          assert(cvs.width === w && cvs.height === h, "Sprite size inesperado");
+          const last = FR - 1;
+          const p = frameXY(last, FR);
+          assert(p.x >= 0 && p.y >= 0, "Frame final pos invalida");
+          const cx = Math.floor(playerMini.width / 2),
+            cy = Math.floor(playerMini.height / 2);
+          const center = mctx.getImageData(cx, cy, 1, 1).data;
+          assert(center[3] === 0, "Centro do mini deve ser transparente");
+          showToast("Testes ok", true);
+        }
+
+        function recalcLayout() {
+          const header = document.querySelector("header.app");
+          const main = document.querySelector("main");
+          const vh = window.innerHeight;
+          const h = header ? header.offsetHeight : 0;
+          document.documentElement.style.setProperty("--header-h", h + "px");
+          if (
+            window.matchMedia("(min-width: 1100px), (min-aspect-ratio: 4/3)")
+              .matches
+          ) {
+            main.style.height = Math.max(320, vh - h - 2) + "px";
+            const head = playerCard.querySelector(".head");
+            const body = playerCard.querySelector(".body");
+            const ctrls = playerCard.querySelector(".ctrls");
+            const cs = getComputedStyle(body);
+            const padTB =
+              parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+            const avail =
+              playerCard.clientHeight -
+              (head?.offsetHeight || 0) -
+              (ctrls?.offsetHeight || 0) -
+              padTB -
+              12;
+            const size = Math.max(
+              120,
+              Math.min(avail, playerCard.clientWidth - 24)
+            );
+            document.documentElement.style.setProperty(
+              "--player-max",
+              size + "px"
+            );
+          } else {
+            main.style.height = "auto";
+            document.documentElement.style.setProperty("--player-max", "100vh");
+          }
+          drawCompositePreview(frame);
+        }
+
+        gEnable.addEventListener("change", () => {
+          globalCtrl.enabled = gEnable.checked;
+          globalCtrl.snap = null;
+          globalCtrl.k = 0;
+          globalCtrl.kActive = false;
+          gK.value = "0";
+          gKVal.textContent = "0%";
+          if (globalCtrl.enabled) showToast("Global ligado", true);
+          else showToast("Global desligado", true);
+          syncControls();
+          drawCompositePreview();
+        });
+        [gOsc, gAmp, gFreq, gRot].forEach((el) =>
+          el.addEventListener("change", () => {
+            globalCtrl.params.osc = gOsc.checked;
+            globalCtrl.params.amp = gAmp.checked;
+            globalCtrl.params.freq = gFreq.checked;
+            globalCtrl.params.rot = gRot.checked;
+            syncControls();
+            drawCompositePreview();
+          })
+        );
+        gDirMode.addEventListener("change", () => {
+          globalCtrl.dirMode = gDirMode.value;
+          syncControls();
+          drawCompositePreview();
+        });
+
+        gK.addEventListener("input", () => {
+          const val = Number(gK.value);
+          const was = globalCtrl.kActive;
+          globalCtrl.k = val / 100;
+          globalCtrl.kActive = Math.abs(val) > 0;
+          gKVal.textContent = val.toFixed(0) + "%";
+          if (globalCtrl.kActive && !was) globalCtrl.snap = deepCopy(rings);
+          if (!globalCtrl.kActive && was) globalCtrl.snap = null;
+          setParamLocks();
+          if (rafK) cancelAnimationFrame(rafK);
+          rafK = requestAnimationFrame(() => drawCompositePreview());
+        });
+        ["pointerdown", "touchstart", "mousedown"].forEach((ev) =>
+          gK.addEventListener(
+            ev,
+            () => {
+              draggingK = true;
+            },
+            { passive: true }
+          )
+        );
+        ["pointerup", "touchend", "mouseup", "mouseleave"].forEach((ev) =>
+          gK.addEventListener(
+            ev,
+            () => {
+              draggingK = false;
+              syncControls();
+              drawCompositePreview();
+            },
+            { passive: true }
+          )
+        );
+        gK.addEventListener("change", () => {
+          syncControls();
+          drawCompositePreview();
+        });
+
+        gApply.addEventListener("click", () => {
+          const bounds = computeBounds();
+          if (globalCtrl.enabled) {
+            rings = rings.map((r) => {
+              const eff = effectiveRing(r, bounds);
+              const n = Object.assign({}, r);
+              if (globalCtrl.params.osc) n.expandPct = eff.expandPct;
+              if (globalCtrl.params.amp) n.ampScale = eff.ampScale;
+              if (globalCtrl.params.freq) n.freqScale = eff.freqScale;
+              if (globalCtrl.params.rot) n.rotateBase = eff.rotateBase;
+              if (globalCtrl.dirMode === "cw") n.rotateSign = 1;
+              else if (globalCtrl.dirMode === "ccw") n.rotateSign = -1;
+              return n;
+            });
+          } else {
+            const r = activeRing();
+            if (r) {
+              const eff = effectiveRing(r, bounds);
+              if (globalCtrl.params.osc) r.expandPct = eff.expandPct;
+              if (globalCtrl.params.amp) r.ampScale = eff.ampScale;
+              if (globalCtrl.params.freq) r.freqScale = eff.freqScale;
+              if (globalCtrl.params.rot) r.rotateBase = eff.rotateBase;
+            }
+          }
+          globalCtrl.k = 0;
+          globalCtrl.kActive = false;
+          gK.value = "0";
+          gKVal.textContent = "0%";
+          globalCtrl.snap = null;
+          renderLayersUI();
+          syncControls();
+          drawCompositePreview();
+          updateMeta();
+          showToast("Aplicado", true);
+        });
+
+        gReset.addEventListener("click", () => {
+          if (globalCtrl.snap) {
+            rings = deepCopy(globalCtrl.snap);
+            renderLayersUI();
+            syncControls();
+            updateMeta();
+          }
+          globalCtrl.k = 0;
+          globalCtrl.kActive = false;
+          gK.value = "0";
+          gKVal.textContent = "0%";
+          globalCtrl.snap = null;
+          drawCompositePreview();
+          showToast("Reposto", true);
+        });
+
+        const init = async () => {
+          renderLayersUI();
+          bindControls();
+          syncControls();
+          updateMeta();
+          await render();
+          recalcLayout();
+          drawCompositePreview(0);
+          requestAnimationFrame(tick);
+          setTimeout(runSmokeTests, 50);
+        };
+        init();
+
+        window.addEventListener("resize", recalcLayout);
+        window.addEventListener("orientationchange", recalcLayout);
+      })();
+    </script>
+  </body>
+</html>
+
