@@ -38,7 +38,7 @@ export const CutsModal = () => {
     try {
       actions.setGifPreviewLoading(true);
       const data = await saveGifFromSprite(bundle);
-      const blob = new Blob([data], { type: "image/gif" });
+      const blob = new Blob([data.buffer as ArrayBuffer], { type: "image/gif" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       const delay = bundle.delayCs;
