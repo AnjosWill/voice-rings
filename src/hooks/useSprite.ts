@@ -18,14 +18,14 @@ export interface UseSpriteArgs {
 }
 
 export const useSprite = ({ canvasRef, spec }: UseSpriteArgs) => {
-  const tileCtxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const tileCtxRef = useRef<CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null>(null);
 
   const ensureTileContext = useCallback(() => {
     if (tileCtxRef.current) return tileCtxRef.current;
     if (typeof window === "undefined" || typeof document === "undefined") return null;
     if (typeof OffscreenCanvas !== "undefined") {
       const offscreen = new OffscreenCanvas(spec.cell, spec.cell);
-      tileCtxRef.current = offscreen.getContext("2d");
+      tileCtxRef.current = offscreen.getContext("2d") as OffscreenCanvasRenderingContext2D | null;
     } else {
       const canvas = document.createElement("canvas");
       canvas.width = spec.cell;

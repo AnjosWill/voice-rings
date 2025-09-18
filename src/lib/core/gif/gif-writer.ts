@@ -68,7 +68,8 @@ export const GifWriter = (width: number, height: number, palette: Uint8Array): G
     w8(0x00);
   };
 
-  let nearest = () => 0;
+  let nearest: (r: number, g: number, b: number, a: number, x: number, y: number) => number =
+  (r, g, b, a, x, y) => 0;
 
   return {
     addFrameIndexed: (

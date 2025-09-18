@@ -1,6 +1,7 @@
 ﻿import { deepCopy } from "../math";
 import { buildPalette } from "../palette";
 import { frameXY, drawSpriteAtlas } from "../sprite/atlas";
+import type { Any2DContext } from "../../core/types";
 import type {
   GifExportBundle,
   GifFrameData,
@@ -12,7 +13,7 @@ import type {
 
 export interface PrepareGifBundleOptions {
   ctx: CanvasRenderingContext2D;
-  tileCtx: CanvasRenderingContext2D;
+  tileCtx: Any2DContext;
   rings: Ring[];
   frameCount: number;
   fps: number;

@@ -1,6 +1,8 @@
 /** Identifier for a ring instance. */
 export type RingId = number;
 
+export type Any2DContext = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+
 /** Tunable parameters that define a single animated ring. */
 export interface Ring {
   id: RingId;

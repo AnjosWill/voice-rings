@@ -9,6 +9,7 @@ import type {
 import { DEFAULT_SPEC } from "../ring";
 import { drawRing } from "../render/drawRing";
 import { computeBounds, effectiveRing } from "../ring";
+import type { Any2DContext } from "../../core/types";
 
 export interface GridOptions {
   cols?: number;
@@ -53,7 +54,7 @@ export const frameXY = (
 
 export interface DrawSpriteAtlasOptions extends GridOptions {
   spec?: SpriteSpec;
-  tileCtx: CanvasRenderingContext2D;
+  tileCtx: Any2DContext;
   global: GlobalController;
   activeId: RingId | null;
   onYield?: (frameIndex: number, totalFrames: number) => void | Promise<void>;

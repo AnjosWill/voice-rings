@@ -2,9 +2,10 @@
 import type { Ring, SpriteSpec } from "../types";
 import { hexToRGBA } from "../palette";
 import { DEFAULT_SPEC } from "../ring";
+import type { Any2DContext } from "../../core/types";
 
 export const drawRing = (
-  ctx: CanvasRenderingContext2D,
+  ctx: Any2DContext,
   frameIndex: number,
   totalFrames: number,
   ring: Ring,
