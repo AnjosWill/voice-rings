@@ -9,14 +9,14 @@ interface UseAnimationOptions {
 export const useAnimation = ({ playing, fps, frameCount }: UseAnimationOptions) => {
   const [frame, setFrame] = useState(0);
   const frameRef = useRef(0);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
   const accRef = useRef(0);
 
   const cancel = () => {
-    if (rafRef.current !== undefined) {
+    if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
-      rafRef.current = undefined;
+      rafRef.current = null;
     }
   };
 
